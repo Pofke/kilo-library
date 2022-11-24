@@ -6,6 +6,12 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateBookRequest extends FormRequest
 {
+    public function authorize(): bool
+    {
+        $user = $this->user();
+        return $user != null && $user->tokenCan('update');
+    }
+
     public function rules(): array
     {
         $method = $this->method();
