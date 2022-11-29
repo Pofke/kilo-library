@@ -73,7 +73,7 @@ class ReservationPolicy
 
     public function delete(User $user, Reservation $reservation)
     {
-        //
+        return $user->tokenCan('update');
     }
 
     public function restore(User $user, Reservation $reservation)

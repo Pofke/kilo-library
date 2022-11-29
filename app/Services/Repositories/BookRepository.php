@@ -11,6 +11,7 @@ use App\Services\Requests\UpdateBookRequest;
 use App\Services\Resources\V1\BookCollection;
 use App\Services\Resources\V1\BookResource;
 use App\Services\Resources\V1\ReservationResource;
+use Barryvdh\Debugbar\Facades\Debugbar;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 

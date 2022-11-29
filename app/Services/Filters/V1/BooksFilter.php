@@ -14,9 +14,10 @@ class BooksFilter extends ApiFilter
         'pages' => ['eq', 'gt', 'lt', 'lte', 'gte'],
         'language' => ['eq'],
         'quantity' => ['eq', 'gt', 'lt', 'lte', 'gte'],
+       // 'currentStock' => ['eq', 'gt', 'lt', 'lte', 'gte'],
     ];
 
     protected array $columnMap = [
-        'currentStock' => 'current_stock',
+        //'currentStock' => 'current_stock',
     ];
 }

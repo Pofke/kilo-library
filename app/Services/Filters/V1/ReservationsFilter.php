@@ -9,7 +9,7 @@ class ReservationsFilter extends ApiFilter
     protected array $safeParams = [
         'bookId' => ['eq'],
         'userId' => ['eq'],
-        'status' => ['eq'],
+        'status' => ['eq', 'ne'],
         'extendedDate' => ['eq', 'gt', 'lt', 'lte', 'gte'],
         'returnedDate' => ['eq', 'gt', 'lt', 'lte', 'gte'],
     ];

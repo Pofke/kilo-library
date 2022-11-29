@@ -31,5 +31,4 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
 
     Route::get('reservations/{reservation}/extend', [ReservationController::class, 'extendBook']);
     Route::get('reservations/{reservation}/return', [ReservationController::class, 'returnBook']);
-    //Route::post('invoices/bulk', [InvoiceController::class, 'bulkStore']);
 });
