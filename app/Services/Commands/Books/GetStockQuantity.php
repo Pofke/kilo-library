@@ -6,12 +6,8 @@ use App\Models\Book;
 
 class GetStockQuantity
 {
-    public function execute($bookId): int
+    public function execute(Book $book): int
     {
-         return Book::selectRaw('(books.quantity - count(reservations.id)) as currentStock')
-            ->where([['books.id', '=', $bookId], ['reservations.status', '!=', 'R']])
-            ->leftJoin('reservations', 'books.id', '=', 'reservations.book_id')
-            ->groupBy("books.id", "books.quantity")
-            ->first()["currentStock"];
+         return $book->quantity - count($book->reservations);
     }
 }

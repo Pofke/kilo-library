@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\Book;
+use App\Services\Commands\Books\GetNotReturnedBooks;
 use App\Services\Commands\Books\GetStockQuantity;
 use App\Services\Repositories\BookRepository;
 use App\Services\Requests\BulkStoreBooksRequest;
@@ -31,7 +32,11 @@ class BookController extends Controller
 
     public function takeBook(Book $book)
     {
-        $this->authorize('takeBookInStock', [Book::class, (new GetStockQuantity())->execute($book->id)]);
+        $book->load(['reservations' => function ($query) {
+            (new GetNotReturnedBooks())->execute($query);
+        }]);
+        $this->authorize('takeBookInStock', [Book::class, (new GetStockQuantity())->execute($book)]);
+        $this->authorize('takeBookNotTakenAlready', [Book::class, $book]);
         $this->bookRepository->takeBook($book);
     }
 

@@ -2,7 +2,6 @@
 
 namespace App\Services\Requests;
 
-use App\Services\Authentication;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -28,7 +27,6 @@ class StoreReservationRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
-
         $data = [];
         $data['book_id'] = $this->bookId;
         $data['user_id'] = $this->userId;

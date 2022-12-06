@@ -32,9 +32,23 @@ class BookPolicy
     }
 
 
-    public function takeBookInStock(User $user, int $stockLeft): Response
+    public function takeBookNotTakenAlready(User $user, Book $book): Response
     {
-        return $stockLeft > 0 ?
+
+        foreach ($book->reservations as $reservation) {
+            if ($reservation->user_id === $user->id) {
+                return Response::denyWithStatus(
+                    422,
+                    'Already have same book.'
+                );
+            }
+        }
+        return Response::allow();
+    }
+
+    public function takeBookInStock(User $user, int $stock): Response
+    {
+        return $stock > 0 ?
             Response::allow() :
             Response::denyWithStatus(
                 422,
