@@ -6,12 +6,12 @@ use App\Models\Book;
 use App\Models\Reservation;
 use App\Services\Commands\Books\GetFilteredBooks;
 use App\Services\Commands\Books\GetNotReturnedBooks;
+use App\Services\DTO\TakeBookDTO;
 use App\Services\Requests\StoreBookRequest;
 use App\Services\Requests\UpdateBookRequest;
 use App\Services\Resources\V1\BookCollection;
 use App\Services\Resources\V1\BookResource;
 use App\Services\Resources\V1\ReservationResource;
-use Barryvdh\Debugbar\Facades\Debugbar;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -36,11 +36,11 @@ class BookRepository
 
     public function takeBook(Book $book): ReservationResource
     {
-        $request = [
-            'user_id' => Auth::id(),
-            'book_id' => $book->id
-        ];
-        return new ReservationResource(Reservation::create($request));
+        $takeBookDTO = new TakeBookDTO(Auth::id(), $book->id);
+        return new ReservationResource(Reservation::create([
+            'user_id' => $takeBookDTO->getUserId(),
+            'book_id' => $takeBookDTO->getBookId()
+        ]));
     }
 
     public function createBook(StoreBookRequest $request): BookResource

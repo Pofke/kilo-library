@@ -4,11 +4,12 @@ namespace App\Services\Repositories;
 
 use App\Models\Reservation;
 use App\Services\Commands\Reservations\GetFilteredReservations;
+use App\Services\DTO\UpdateStatusDTO;
 use App\Services\Requests\StoreReservationRequest;
 use App\Services\Requests\UpdateReservationRequest;
 use App\Services\Resources\V1\ReservationCollection;
 use App\Services\Resources\V1\ReservationResource;
-use Carbon\Carbon;
+use DateTime;
 use Illuminate\Http\Request;
 
 class ReservationRepository
@@ -26,20 +27,20 @@ class ReservationRepository
 
     public function extendBookReservation(Reservation $reservation): void
     {
-        $request = [
-            'status' => "E",
-            'extended_date' => Carbon::now()->addMonth()
-        ];
-        $reservation->update($request);
+        $updateDTO = new UpdateStatusDTO('E');
+        $reservation->update([
+            'status' => $updateDTO->getStatus(),
+            'extended_date' => $updateDTO->getDate()->modify('+1 month')
+        ]);
     }
 
     public function returnReservedBook(Reservation $reservation): void
     {
-        $request = [
-            'status' => "R",
-            'returned_date' => Carbon::now()
-        ];
-        $reservation->update($request);
+        $updateDTO = new UpdateStatusDTO('R');
+        $reservation->update([
+            'status' => $updateDTO->getStatus(),
+            'returned_date' => $updateDTO->getDate()
+        ]);
     }
 
     public function getReservation(Reservation $reservation): ReservationResource
