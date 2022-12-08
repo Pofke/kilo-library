@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Filters\V1;
 
 use App\Services\Filters\ApiFilter;
@@ -14,10 +16,5 @@ class BooksFilter extends ApiFilter
         'pages' => ['eq', 'gt', 'lt', 'lte', 'gte'],
         'language' => ['eq'],
         'quantity' => ['eq', 'gt', 'lt', 'lte', 'gte'],
-       // 'currentStock' => ['eq', 'gt', 'lt', 'lte', 'gte'],
-    ];
-
-    protected array $columnMap = [
-        //'currentStock' => 'current_stock',
     ];
 }

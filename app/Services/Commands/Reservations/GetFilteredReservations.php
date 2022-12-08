@@ -1,16 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Commands\Reservations;
 
 use App\Models\Reservation;
 use App\Services\Filters\V1\ReservationsFilter;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class GetFilteredReservations
 {
-    public function execute(Request $request): Builder
+    public function execute(Request $request): Reservation
     {
         $filter = new ReservationsFilter();
         $filterItems = $filter->transform($request);

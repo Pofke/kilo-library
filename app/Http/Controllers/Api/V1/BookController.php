@@ -1,15 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\Book;
 use App\Services\Commands\Books\GetNotReturnedBooks;
-use App\Services\Commands\Books\GetStockQuantity;
 use App\Services\Repositories\BookRepository;
-use App\Services\Requests\BulkStoreBooksRequest;
-use App\Services\Requests\StoreBookRequest;
-use App\Services\Requests\UpdateBookRequest;
+use App\Services\Requests\V1\BulkStoreBooksRequest;
+use App\Services\Requests\V1\StoreBookRequest;
+use App\Services\Requests\V1\UpdateBookRequest;
 use App\Services\Resources\V1\BookCollection;
 use App\Services\Resources\V1\BookResource;
 use Illuminate\Http\Request;
@@ -30,13 +31,13 @@ class BookController extends Controller
         return $this->bookRepository->createBook($request);
     }
 
-    public function takeBook(Book $book)
+    public function takeBook(Book $book): void
     {
         $book->load(['reservations' => function ($query) {
             (new GetNotReturnedBooks())->execute($query);
         }]);
-        $this->authorize('takeBookInStock', [Book::class, (new GetStockQuantity())->execute($book)]);
-        $this->authorize('takeBookNotTakenAlready', [Book::class, $book]);
+        $this->authorize('chosenBookInStock', [Book::class, $book]);
+        $this->authorize('chosenBookIsNotSame', [Book::class, $book]);
         $this->bookRepository->takeBook($book);
     }
 
@@ -52,12 +53,11 @@ class BookController extends Controller
 
     public function destroy(Book $book): void
     {
-
         $this->bookRepository->deleteBook($book);
     }
 
-    public function bulkStore(BulkStoreBooksRequest $request)
+    public function bulkStore(BulkStoreBooksRequest $request): void
     {
-         Book::insert($request->toArray());
+        $this->bookRepository->bulkAddBook($request);
     }
 }

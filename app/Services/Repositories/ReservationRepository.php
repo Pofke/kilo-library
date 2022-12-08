@@ -1,15 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Repositories;
 
 use App\Models\Reservation;
 use App\Services\Commands\Reservations\GetFilteredReservations;
 use App\Services\DTO\UpdateStatusDTO;
-use App\Services\Requests\StoreReservationRequest;
-use App\Services\Requests\UpdateReservationRequest;
+use App\Services\Requests\V1\StoreReservationRequest;
+use App\Services\Requests\V1\UpdateReservationRequest;
 use App\Services\Resources\V1\ReservationCollection;
 use App\Services\Resources\V1\ReservationResource;
-use DateTime;
 use Illuminate\Http\Request;
 
 class ReservationRepository
@@ -51,5 +52,10 @@ class ReservationRepository
     public function updateReservation(UpdateReservationRequest $request, Reservation $reservation): void
     {
         $reservation->update($request->all());
+    }
+
+    public function deleteReservation(Reservation $reservation): void
+    {
+        $reservation->delete();
     }
 }

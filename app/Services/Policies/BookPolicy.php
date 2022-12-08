@@ -1,9 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Policies;
 
 use App\Models\Book;
 use App\Models\User;
+use App\Services\Commands\Books\IsBookInStock;
+use App\Services\Commands\Reservations\IsBookAlreadyReserved;
+use App\Services\Exceptions\AlreadyHaveSameBookException;
+use App\Services\Exceptions\BookOutOfStockException;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Auth\Access\Response;
 
@@ -11,63 +17,27 @@ class BookPolicy
 {
     use HandlesAuthorization;
 
-    public function viewAny(User $user)
+    public function chosenBookInStock(User $user, Book $book)
     {
-        //
+        $bookIsInStock = (new IsBookInStock())->execute($book);
+        if ($bookIsInStock) {
+            return Response::allow();
+        }
+        return Response::denyWithStatus(
+            422,
+            (new BookOutOfStockException())->execute()
+        );
     }
 
-    public function view(User $user, Book $book)
+    public function chosenBookIsNotSame(User $user, Book $book): Response
     {
-        //
-    }
-
-    public function create(User $user)
-    {
-        //
-    }
-
-    public function update(User $user, Book $book)
-    {
-        //
-    }
-
-
-    public function takeBookNotTakenAlready(User $user, Book $book): Response
-    {
-
-        foreach ($book->reservations as $reservation) {
-            if ($reservation->user_id === $user->id) {
-                return Response::denyWithStatus(
-                    422,
-                    'Already have same book.'
-                );
-            }
+        $bookIsAlreadyReserved = (new IsBookAlreadyReserved())->execute($user->id, $book);
+        if ($bookIsAlreadyReserved) {
+            return Response::denyWithStatus(
+                422,
+                (new AlreadyHaveSameBookException())->execute()
+            );
         }
         return Response::allow();
-    }
-
-    public function takeBookInStock(User $user, int $stock): Response
-    {
-        return $stock > 0 ?
-            Response::allow() :
-            Response::denyWithStatus(
-                422,
-                'Book is not in stock.'
-            );
-    }
-
-    public function delete(User $user, Book $book)
-    {
-        //
-    }
-
-    public function restore(User $user, Book $book)
-    {
-        //
-    }
-
-    public function forceDelete(User $user, Book $book)
-    {
-        //
     }
 }

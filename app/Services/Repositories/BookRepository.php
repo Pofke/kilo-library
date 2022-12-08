@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Repositories;
 
 use App\Models\Book;
@@ -7,8 +9,9 @@ use App\Models\Reservation;
 use App\Services\Commands\Books\GetFilteredBooks;
 use App\Services\Commands\Books\GetNotReturnedBooks;
 use App\Services\DTO\TakeBookDTO;
-use App\Services\Requests\StoreBookRequest;
-use App\Services\Requests\UpdateBookRequest;
+use App\Services\Requests\V1\BulkStoreBooksRequest;
+use App\Services\Requests\V1\StoreBookRequest;
+use App\Services\Requests\V1\UpdateBookRequest;
 use App\Services\Resources\V1\BookCollection;
 use App\Services\Resources\V1\BookResource;
 use App\Services\Resources\V1\ReservationResource;
@@ -51,6 +54,11 @@ class BookRepository
     public function updateBook(UpdateBookRequest $request, Book $book): void
     {
         $book->update($request->all());
+    }
+
+    public function bulkAddBook(BulkStoreBooksRequest $request): void
+    {
+        Book::insert($request->toArray());
     }
 
     public function deleteBook(Book $book): void
