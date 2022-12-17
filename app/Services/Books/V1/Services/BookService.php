@@ -2,6 +2,7 @@
 
 namespace App\Services\Books\V1\Services;
 
+use App\Filters\V1\BooksFilter;
 use App\Filters\V1\ReservationsFilter;
 use App\Models\Book;
 use App\Repositories\Interfaces\BookRepositoryInterface;
@@ -11,6 +12,7 @@ use App\Requests\V1\UpdateBookRequest;
 use App\Resources\V1\BookCollection;
 use App\Resources\V1\BookResource;
 use App\Resources\V1\ReservationCollection;
+use App\Resources\V1\ReservationResource;
 use App\Services\Books\V1\DTO\TakeBookDTO;
 use App\Services\Books\V1\Exceptions\OutOfStockException;
 use App\Services\Reservations\V1\Exceptions\AlreadyReservedException;
@@ -24,15 +26,9 @@ class BookService
     {
     }
 
-    private function getFilterItems(Request $request): array
-    {
-        $filter = new ReservationsFilter();
-        return $filter->transform($request);
-    }
-
     public function getBooks(Request $request): BookCollection
     {
-        $filterItems = $this->getFilterItems($request);
+        $filterItems = (new BooksFilter())->transform($request->query());
         $books = $this->bookRepository->getBooks($filterItems);
         return new BookCollection($books->paginate()->appends($request->query()));
     }
@@ -44,6 +40,7 @@ class BookService
 
     public function getBook(Book $book): BookResource
     {
+
         return new BookResource($this->bookRepository->getBook($book));
     }
 
@@ -66,17 +63,15 @@ class BookService
      * @throws AlreadyReservedException
      * @throws OutOfStockException
      */
-    public function takeBook(Book $book): BookResource
+    public function takeBook(Book $book): ReservationResource
     {
-        $book->load(['reservations' => function ($query) {
-            (new GetNotReturnedBooksService())->execute($query);
-        }]);
+        $book = $this->bookRepository->getBook($book);
 
         $bookIsInStock = (new IsBookInStockService())->execute($book);
         if (!$bookIsInStock) {
             throw new OutOfStockException();
         }
-
+        print_r($book->reservations);
         $bookIsReserved = (new IsBookReservedService())->execute(
             new ReservationCollection($book->reservations),
             Auth::id()
@@ -87,6 +82,6 @@ class BookService
 
         $takeBookDTO = new TakeBookDTO(Auth::id(), $book->id);
 
-        return new BookResource($this->bookRepository->takeBook($takeBookDTO));
+        return new ReservationResource($this->bookRepository->takeBook($takeBookDTO));
     }
 }

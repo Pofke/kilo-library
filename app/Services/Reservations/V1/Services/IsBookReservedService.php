@@ -8,6 +8,7 @@ class IsBookReservedService
 {
     public function execute(ReservationCollection $reservations, int $userId): bool
     {
+
         foreach ($reservations as $reservation) {
             if ($reservation->user_id === $userId) {
                 return true;

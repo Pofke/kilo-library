@@ -4,33 +4,32 @@ declare(strict_types=1);
 
 namespace App\Filters;
 
-use Illuminate\Http\Request;
+use App\Services\Utils\Constants;
 
 class ApiFilter
 {
     protected array $safeParams = [];
     protected array $columnMap = [];
     protected array $operatorMap = [
-        'eq' => '=',
-        'lt' => '<',
-        'lte' => '<=',
-        'gt' => '>',
-        'gte' => '>=',
-        'ne' => '!='
+        Constants::FILTER_EQUAL => '=',
+        Constants::FILTER_LESS => '<',
+        Constants::FILTER_LESS_EQUAL => '<=',
+        Constants::FILTER_GREATER => '>',
+        Constants::FILTER_GREATER_EQUAL => '>=',
+        Constants::FILTER_NOT_EQUAL => '!='
     ];
 
-    public function transform(Request $request): array
+    public function transform(array $request): array
     {
         $eloQuery = [];
         foreach ($this->safeParams as $param => $operators) {
-            $query = $request->query($param);
-
-            if (!isset($query)) {
+            if (!array_key_exists($param, $request)) {
                 continue;
             }
+            $query = $request[$param];
             $column = $this->columnMap[$param] ?? $param;
             foreach ($operators as $operator) {
-                if (isset($query[$operator])) {
+                if (array_key_exists($operator, $query)) {
                     $eloQuery[] = [$column, $this->operatorMap[$operator], $query[$operator]];
                 }
             }

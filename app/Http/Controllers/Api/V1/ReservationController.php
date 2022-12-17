@@ -72,8 +72,13 @@ class ReservationController extends Controller
         $this->reservationService->updateReservation($request, $reservation);
     }
 
+    /**
+     * @throws AuthorizationException
+     */
     public function destroy(Reservation $reservation): void
     {
+
+        $this->authorize('delete', Reservation::class);
         $this->reservationService->deleteReservation($reservation);
     }
 }

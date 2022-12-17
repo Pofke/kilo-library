@@ -12,7 +12,7 @@ use App\Services\Books\V1\DTO\TakeBookDTO;
 
 interface BookRepositoryInterface
 {
-    public function getBookById(int $bookId): BookResource;
+    public function getBookById(int $bookId): Book;
     public function getBooks(array $filterItems);
     public function createBook(StoreBookRequest $request): BookResource;
     public function getBook(Book $book): Book;

@@ -10,6 +10,6 @@ class IsBookInStockService
 {
     public function execute(Book $book): bool
     {
-        return ((new GetStockQuantityService())->execute($book) > 0);
+        return $book->quantity > count($book->reservations);
     }
 }

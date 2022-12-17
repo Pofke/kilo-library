@@ -19,12 +19,16 @@ class BookRepository implements BookRepositoryInterface
 {
     public function getBooks(array $filterItems): Builder
     {
-        return Book::where($filterItems);
+        $books = Book::where($filterItems);
+        $books->with(['reservations' => function ($query) {
+            (new GetNotReturnedBooksService())->execute($query);
+        }]);
+        return $books;
     }
 
     public function getBook(Book $book): Book
     {
-        $book->loadCount(['reservations' => function ($query) {
+        $book->load(['reservations' => function ($query) {
             (new GetNotReturnedBooksService())->execute($query);
         }]);
         return $book;
@@ -57,12 +61,12 @@ class BookRepository implements BookRepositoryInterface
         $book->delete();
     }
 
-    public function getBookById(int $bookId): BookResource
+    public function getBookById(int $bookId): Book
     {
         $book = Book::findOrFail($bookId)->load(['reservations' => function ($query) {
             (new GetNotReturnedBooksService())->execute($query);
         }]);
 
-        return new BookResource($book);
+        return $book;
     }
 }

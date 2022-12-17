@@ -19,7 +19,7 @@ class ReservationPolicy
         return $admin || $allow;
     }
 
-    public function delete(User $user, Reservation $reservation): bool
+    public function delete(User $user): bool
     {
         return $user->tokenCan('update');
     }

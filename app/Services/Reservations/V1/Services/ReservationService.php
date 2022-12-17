@@ -8,15 +8,15 @@ use App\Repositories\Interfaces\BookRepositoryInterface;
 use App\Repositories\Interfaces\ReservationRepositoryInterface;
 use App\Requests\V1\StoreReservationRequest;
 use App\Requests\V1\UpdateReservationRequest;
-use App\Resources\V1\BookResource;
 use App\Resources\V1\ReservationCollection;
 use App\Resources\V1\ReservationResource;
 use App\Services\Books\V1\Exceptions\OutOfStockException;
+use App\Services\Books\V1\Services\IsBookInStockService;
 use App\Services\Reservations\V1\DTO\UpdateStatusDTO;
 use App\Services\Reservations\V1\Exceptions\AlreadyHasSameStatusException;
 use App\Services\Reservations\V1\Exceptions\AlreadyReservedException;
+use App\Services\Utils\Constants;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class ReservationService
 {
@@ -26,41 +26,16 @@ class ReservationService
     ) {
     }
 
-
-    private function getFilterItems(Request $request): array
-    {
-        $filter = new ReservationsFilter();
-        $filterItems = $filter->transform($request);
-
-        $user = Auth::user();
-        if ($user->tokenCan('getSelf')) {
-            $filterItems[] = (new AddUserIdFilterService())->execute(Auth::id());
-        }
-        return $filterItems;
-    }
-
-    private function getStockQuantity(BookResource $book): int
-    {
-        return $book->quantity - count($book->reservations);
-    }
-
-    private function isBookInStock(BookResource $book): bool
-    {
-        return $this->getStockQuantity($book) > 0;
-    }
-
-    private function isBookStatusReturned(string $status): bool
-    {
-        return $status === 'R';
-    }
-
     public function getReservations(Request $request): ReservationCollection
     {
-        $filterItems = $this->getFilterItems($request);
+        $filterItems = (new ReservationsFilter())->transform($request->query());
+        $userIdFilter = (new AddUserIdFilterForReaderService())->execute();
+        if ($userIdFilter) {
+            $filterItems[] = $userIdFilter;
+        }
         $reservations = $this->reservationRepository->getReservations($filterItems);
         return new ReservationCollection($reservations->paginate()->appends($request->query()));
     }
-
 
     /**
      * @throws AlreadyReservedException
@@ -69,9 +44,8 @@ class ReservationService
     public function createReservation(StoreReservationRequest $request): ReservationResource
     {
         $book = $this->bookRepository->getBookById($request->bookId);
-        $bookIsReturned = $this->isBookStatusReturned($request->status);
-
-        if (!($this->isBookInStock($book) || $bookIsReturned)) {
+        $bookIsReturned = (new IsStatusReturnedService())->execute($request->status);
+        if (!((new IsBookInStockService())->execute($book) || $bookIsReturned)) {
             throw new OutOfStockException();
         }
 
@@ -86,6 +60,9 @@ class ReservationService
         return new ReservationResource($this->reservationRepository->createReservation($request));
     }
 
+    /**
+     * @throws AlreadyHasSameStatusException
+     */
     public function extendBookReservation(Reservation $reservation): void
     {
 
@@ -93,17 +70,20 @@ class ReservationService
         if ($isStatusTaken) {
             throw new AlreadyHasSameStatusException($reservation->status);
         }
-        $updateDTO = new UpdateStatusDTO('E');
+        $updateDTO = new UpdateStatusDTO(Constants::STATUS_EXTENDED);
         $this->reservationRepository->extendReturnReservation($reservation, $updateDTO);
     }
 
+    /**
+     * @throws AlreadyHasSameStatusException
+     */
     public function returnBookReservation(Reservation $reservation): void
     {
         $bookIsReturned = (new IsStatusReturnedService())->execute($reservation->status);
         if ($bookIsReturned) {
             throw new AlreadyHasSameStatusException($reservation->status);
         }
-        $updateDTO = new UpdateStatusDTO('R');
+        $updateDTO = new UpdateStatusDTO(Constants::STATUS_RETURNED);
         $this->reservationRepository->extendReturnReservation($reservation, $updateDTO);
     }
 

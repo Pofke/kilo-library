@@ -20,8 +20,8 @@ class BookResource extends JsonResource
             'genre' => $this->genre,
             'pages' => $this->pages,
             'language' => $this->language,
-            'currentStock' => $this->quantity - $this->reservations_count,
-            'quantity' => $this->quantity
+            'currentStock' => $this->quantity - count($this->reservations),
+            'quantity' => $this->quantity,
         ];
     }
 }
