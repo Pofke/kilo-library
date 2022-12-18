@@ -4,15 +4,17 @@ declare(strict_types=1);
 
 namespace App\Services\Books\V1\DTO;
 
+use Illuminate\Support\Facades\Auth;
+
 class TakeBookDTO
 {
-    public function __construct(private int $userId, private int $bookId)
+    public function __construct(private int $bookId)
     {
     }
 
     public function getUserId(): int
     {
-        return $this->userId;
+        return Auth::id();
     }
 
     public function getBookId(): int

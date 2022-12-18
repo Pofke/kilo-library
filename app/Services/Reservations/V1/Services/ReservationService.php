@@ -43,12 +43,12 @@ class ReservationService
      */
     public function createReservation(StoreReservationRequest $request): ReservationResource
     {
+
         $book = $this->bookRepository->getBookById($request->bookId);
         $bookIsReturned = (new IsStatusReturnedService())->execute($request->status);
         if (!((new IsBookInStockService())->execute($book) || $bookIsReturned)) {
             throw new OutOfStockException();
         }
-
         $bookIsReserved = (new IsBookReservedService())->execute(
             new ReservationCollection($book->reservations),
             $request->userId
@@ -56,7 +56,6 @@ class ReservationService
         if ($bookIsReserved && !$bookIsReturned) {
             throw new AlreadyReservedException();
         }
-
         return new ReservationResource($this->reservationRepository->createReservation($request));
     }
 
@@ -67,7 +66,7 @@ class ReservationService
     {
 
         $isStatusTaken = (new IsStatusTakenService())->execute($reservation->status);
-        if ($isStatusTaken) {
+        if (!$isStatusTaken) {
             throw new AlreadyHasSameStatusException($reservation->status);
         }
         $updateDTO = new UpdateStatusDTO(Constants::STATUS_EXTENDED);

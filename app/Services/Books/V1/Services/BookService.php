@@ -26,11 +26,11 @@ class BookService
     {
     }
 
-    public function getBooks(Request $request): BookCollection
+    public function getBooks(array $request): BookCollection
     {
-        $filterItems = (new BooksFilter())->transform($request->query());
+        $filterItems = (new BooksFilter())->transform($request);
         $books = $this->bookRepository->getBooks($filterItems);
-        return new BookCollection($books->paginate()->appends($request->query()));
+        return new BookCollection($books->paginate()->appends($request));
     }
 
     public function createBook(StoreBookRequest $request): BookResource
@@ -40,7 +40,6 @@ class BookService
 
     public function getBook(Book $book): BookResource
     {
-
         return new BookResource($this->bookRepository->getBook($book));
     }
 
@@ -67,11 +66,6 @@ class BookService
     {
         $book = $this->bookRepository->getBook($book);
 
-        $bookIsInStock = (new IsBookInStockService())->execute($book);
-        if (!$bookIsInStock) {
-            throw new OutOfStockException();
-        }
-        print_r($book->reservations);
         $bookIsReserved = (new IsBookReservedService())->execute(
             new ReservationCollection($book->reservations),
             Auth::id()
@@ -80,7 +74,12 @@ class BookService
             throw new AlreadyReservedException();
         }
 
-        $takeBookDTO = new TakeBookDTO(Auth::id(), $book->id);
+        $bookIsInStock = (new IsBookInStockService())->execute($book);
+        if (!$bookIsInStock) {
+            throw new OutOfStockException();
+        }
+
+        $takeBookDTO = new TakeBookDTO($book->id);
 
         return new ReservationResource($this->bookRepository->takeBook($takeBookDTO));
     }
