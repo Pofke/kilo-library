@@ -5,7 +5,6 @@
 ```
 git clone https://github.com/Pofke/kilo-library.git
 ```
-
 2. Install composer
 ```
 composer install
@@ -28,9 +27,13 @@ docker exec library-php php artisan migrate --seed
 ```
 7. Generate tokens
 [http://127.0.0.1:8000/setup](http://127.0.0.1:8000/setup)
-
+8. Copy tokens and use them in API calls.
 
 ## API Commands
+### Specify header settings
+```
+Authorization: Bearer [generated token]
+```
 ### Book
 #### Get books
 ```

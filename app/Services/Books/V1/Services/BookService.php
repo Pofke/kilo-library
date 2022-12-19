@@ -3,7 +3,6 @@
 namespace App\Services\Books\V1\Services;
 
 use App\Filters\V1\BooksFilter;
-use App\Filters\V1\ReservationsFilter;
 use App\Models\Book;
 use App\Repositories\Interfaces\BookRepositoryInterface;
 use App\Requests\V1\BulkStoreBooksRequest;
@@ -17,7 +16,6 @@ use App\Services\Books\V1\DTO\TakeBookDTO;
 use App\Services\Books\V1\Exceptions\OutOfStockException;
 use App\Services\Reservations\V1\Exceptions\AlreadyReservedException;
 use App\Services\Reservations\V1\Services\IsBookReservedService;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class BookService

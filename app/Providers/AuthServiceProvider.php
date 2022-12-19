@@ -17,15 +17,8 @@ class AuthServiceProvider extends ServiceProvider
         Reservation::class => ReservationPolicy::class,
     ];
 
-    /**
-     * Register any authentication / authorization services.
-     *
-     * @return void
-     */
-    public function boot()
+    public function boot(): void
     {
         $this->registerPolicies();
-
-        //
     }
 }
