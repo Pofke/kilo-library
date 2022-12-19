@@ -1,66 +1,219 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Library API
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Project installation
+1. Clone repository
+```
+git clone https://github.com/Pofke/kilo-library.git
+```
 
-## About Laravel
+2. Install composer
+```
+composer install
+```
+3. Copy .env.example file and specify database settings
+```
+cp .env.example .env
+```
+4. Open Docker and build service:
+```
+docker-compose build
+```
+5. Create and start containers
+```
+docker-compose up -d
+```
+6. Migrate and seed database
+```
+docker exec library-php php artisan migrate --seed
+```
+7. Generate tokens
+[http://127.0.0.1:8000/setup](http://127.0.0.1:8000/setup)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## API Commands
+### Book
+#### Get books
+```
+GET api/v1/books
+```
+#### Get book
+```
+GET api/v1/books/{book}
+```
+#### Store books in bulk
+```
+POST api/v1/books/bulk
+Body:
+[
+	{
+		"name": "ausiaus drama",
+		"author": "Suniukas rexas",
+		"year": 2022,
+		"genre": "drama",
+		"pages": 242,
+		"language": "en",
+		"quantity": 32
+	},
+	{
+		"name": "ispazintis",
+		"author": "Mr. Jonas Kazakevičius",
+		"year": 2013,
+		"genre": "biografija",
+		"pages": 110,
+		"language": "lt",
+		"quantity": 3
+	}
+]
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
-## Learning Laravel
+Only admin or librarian allowed
+```
+#### Store book
+```
+POST api/v1/books
+Body:
+{
+	"name": "miauksiaus romanas",
+	"author": "Katinas Leopoldas",
+	"year": 2015,
+	"genre": "romanas",
+	"pages": 132,
+	"language": "lt",
+	"quantity": 12
+}
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+Only admin or librarian allowed
+```
+#### Update book
+```
+PUT|PATCH api/v1/books/{book}
+Body:
+{
+	"name": "miauksiaus romanas",
+	"author": "Katinas Leopoldas",
+	"year": 2015,
+	"genre": "romanas",
+	"pages": 132,
+	"language": "lt",
+	"quantity": 12
+}
+PUT - All rows needs to be included
+PATCH - Only rows which will be updated needs to be included
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Only admin or librarian allowed
+```
+#### Delete book
+```
+DELETE api/v1/books/{book}
 
-## Laravel Sponsors
+Only admin or librarian allowed
+```
+#### Take book
+```
+PATCH api/v1/books/{book}/take
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+Only works if book is available and user don't have it already
+```
 
-### Premium Partners
+### Reservation
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+#### Get reservations 
+```
+GET api/v1/reservations
 
-## Contributing
+Admin and librarian gets all, reader gets his
+```
+#### Get reservation
+```
+GET api/v1/reservations/{reservation}
+```
+#### Create reservation
+```
+POST api/v1/reservations
+Body:
+{
+	"bookId": 1,
+	"userId": 3,
+	"status": "T"
+}
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Only admin or librarian allowed
+```
+#### Update reservation
+```
+PUT|PATCH api/v1/reservations/{reservation}
+Body:
+{
+    "bookId": 1,
+    "userId": 3,
+    "status": "R",
+    "extendedDate": "2022-10-15",
+    "returnedDate": "2022-11-10"
+}
+PUT - All rows needs to be included
+PATCH - Only rows which will be updated needs to be included
 
-## Code of Conduct
+Only admin or librarian allowed
+```
+#### Delete reservation
+```
+DELETE api/v1/reservations/{reservation}
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Only admin or librarian allowed
+```
+#### Extend reservation
+```
+PATCH api/v1/reservations/{reservation}/extend
 
-## Security Vulnerabilities
+Reader can extend reservation for one time
+```
+#### Return book
+```
+PATCH api/v1/reservations/{reservation}/return
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Filters
+Filters are only available in Get Books and Get Reservations commands.
+### Available operations
 
-## License
+| Operation map | Opearations |
+|---------------|:-----------:|
+| eq            |      =      |
+| ne            |     !=      |
+| lt            |      <      |
+| lte           |     <=      |
+| gt            |      >      |
+| gte           |     >=      |
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### Books
+| Parameters | Available Operations |
+|------------|:--------------------:|
+| name       |          =           |
+| author     |          =           |
+| year       |   =, <, <=, >, >=    |
+| genre      |          =           |
+| pages      |   =, <, <=, >, >=    |
+| language   |          =           |
+| quantity   |   =, <, <=, >, >=    |
+Example:
+```
+GET api/v1/books?year[lt]=2000&pages[gte]=300&genre[eq]=horror
+```
+
+### Reservations
+| Parameters   | Available Operations |
+|--------------|:--------------------:|
+| bookId       |          =           |
+| userId       |          =           |
+| status       |        =, !=         |
+| extendedDate |   =, <, <=, >, >=    |
+| returnedDate |   =, <, <=, >, >=    |
+Example:
+```
+GET api/v1/reservations?status[ne]=R
+```
+
+
+## Author
+[Povilas Baranskas](https://github.com/Pofke), 2022
